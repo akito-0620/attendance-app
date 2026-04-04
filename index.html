@@ -339,69 +339,45 @@
       cursor: pointer;
     }
 
-    /* Class edit modal */
-    .student-list { margin-top: 8px; }
-    .student-item {
-      display: flex;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #f2f2f7;
+    /* Class edit modal - seat grid */
+    .seat-hint { font-size: 12px; color: #8e8e93; margin-top: 2px; }
+    .blackboard-mini {
+      background: #2d5a27;
+      color: #fff;
+      text-align: center;
+      padding: 5px;
+      border-radius: 6px;
+      font-size: 11px;
+      margin-bottom: 6px;
     }
-    .student-item:last-child { border-bottom: none; }
-    .student-num {
-      width: 28px;
-      height: 28px;
-      background: #f2f2f7;
-      border-radius: 50%;
+    .edit-seat {
+      height: 48px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
-      font-weight: 600;
-      color: #8e8e93;
-      margin-right: 10px;
-      flex-shrink: 0;
-    }
-    .student-name { flex: 1; font-size: 15px; }
-    .student-del {
-      width: 28px;
-      height: 28px;
-      background: #ff3b30;
-      border: none;
-      border-radius: 50%;
-      color: #fff;
-      font-size: 16px;
+      font-size: 11px;
+      text-align: center;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      transition: all 0.15s;
+      padding: 3px;
+      line-height: 1.2;
+      word-break: break-all;
+      border: 1.5px dashed #c7c7cc;
+      color: #c7c7cc;
+      user-select: none;
     }
-    .add-student-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
+    .edit-seat.occupied {
+      background: #e8f4fd;
+      border: 1.5px solid #007aff;
+      color: #007aff;
+      font-weight: 500;
     }
-    .add-student-row input {
-      flex: 1;
-      padding: 10px 12px;
-      border: 1px solid #e5e5ea;
-      border-radius: 10px;
-      font-size: 15px;
-      background: #f9f9f9;
+    .edit-seat.selected {
+      outline: 3px solid #ff9500;
+      outline-offset: 1px;
     }
-    .add-student-row input:focus { outline: none; border-color: #007aff; }
-    .add-student-row button {
-      padding: 10px 16px;
-      background: #007aff;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
+    .edit-seat:active { transform: scale(0.92); }
     .delete-class-btn {
       width: 100%;
       padding: 12px;
@@ -505,19 +481,25 @@
     <div class="form-row-inline">
       <div class="form-row">
         <div class="form-label">列数（横）</div>
-        <input class="form-input" id="classColsInput" type="number" min="1" max="10" value="6">
+        <input class="form-input" id="classColsInput" type="number" min="1" max="10" value="6" onchange="renderEditGrid()">
       </div>
       <div class="form-row">
         <div class="form-label">行数（縦）</div>
-        <input class="form-input" id="classRowsInput" type="number" min="1" max="10" value="5">
+        <input class="form-input" id="classRowsInput" type="number" min="1" max="10" value="5" onchange="renderEditGrid()">
       </div>
     </div>
     <div class="form-row">
-      <div class="form-label">生徒一覧（<span id="studentCount">0</span>名）</div>
-      <div class="student-list" id="studentList"></div>
-      <div class="add-student-row">
-        <input id="newStudentInput" placeholder="生徒の名前" type="text" onkeydown="if(event.key==='Enter')addStudent()">
-        <button onclick="addStudent()">追加</button>
+      <div class="form-label">座席配置（<span id="studentCount">0</span>名登録済み）</div>
+      <div class="seat-hint">空の席をタップして生徒を配置できます</div>
+      <div id="editSeatGrid" style="overflow-x:auto; margin-top:8px;"></div>
+      <div id="seatInputBar" style="display:none; margin-top:10px;">
+        <div class="form-label" id="seatInputLabel">生徒名を入力</div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <input class="form-input" id="seatNameInput" placeholder="名前" type="text" style="flex:1;" onkeydown="if(event.key==='Enter')confirmSeatAssign()">
+          <button class="btn-ok" style="flex:0;padding:10px 14px;border-radius:10px;" onclick="confirmSeatAssign()">登録</button>
+          <button class="btn-cancel" style="flex:0;padding:10px 14px;border-radius:10px;" onclick="cancelSeatInput()">×</button>
+        </div>
+        <button id="seatDeleteBtn" class="delete-class-btn" style="display:none;margin-top:6px;" onclick="deleteSeat()">この席の生徒を削除</button>
       </div>
     </div>
     <div class="modal-actions">
@@ -556,6 +538,15 @@ function loadData() {
       state.records = d.records || [];
     }
   } catch(e) {}
+  // 旧データの移行: row/colがない生徒にインデックスから位置を割り当て
+  state.classes.forEach(cls => {
+    cls.students.forEach((s, i) => {
+      if (s.row === undefined || s.col === undefined) {
+        s.row = Math.floor(i / (cls.cols || 6));
+        s.col = i % (cls.cols || 6);
+      }
+    });
+  });
   if (state.classes.length > 0) {
     state.currentClassId = state.classes[0].id;
   }
@@ -659,16 +650,17 @@ function renderAttendanceContent() {
 
   const cols = cls.cols || 6;
 
-  // Build grid cells
+  // Build grid cells using row/col positions
   let seats = '';
-  const slots = cls.rows * cols;
-  for (let i = 0; i < slots; i++) {
-    const student = cls.students[i];
-    if (student) {
-      const isPresent = state.presentIds.has(student.id);
-      seats += `<div class="seat ${isPresent ? 'present' : ''}" onclick="toggleSeat('${student.id}')">${escapeHtml(student.name)}</div>`;
-    } else {
-      seats += `<div class="seat empty">　</div>`;
+  for (let r = 0; r < cls.rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const student = cls.students.find(s => s.row === r && s.col === c);
+      if (student) {
+        const isPresent = state.presentIds.has(student.id);
+        seats += `<div class="seat ${isPresent ? 'present' : ''}" onclick="toggleSeat('${student.id}')">${escapeHtml(student.name)}</div>`;
+      } else {
+        seats += `<div class="seat empty">　</div>`;
+      }
     }
   }
 
@@ -761,12 +753,14 @@ function renderClasses() {
 function openNewClassModal() {
   state.editingClassId = null;
   state.editingStudents = [];
+  selectedSeatPos = null;
   document.getElementById('classModalTitle').textContent = '新しいクラス';
   document.getElementById('classNameInput').value = '';
   document.getElementById('classColsInput').value = '6';
   document.getElementById('classRowsInput').value = '5';
   document.getElementById('deleteClassBtn').style.display = 'none';
-  renderStudentList();
+  document.getElementById('seatInputBar').style.display = 'none';
+  renderEditGrid();
   document.getElementById('classModal').classList.add('open');
   document.getElementById('classNameInput').focus();
 }
@@ -776,12 +770,14 @@ function openEditClassModal(classId) {
   if (!cls) return;
   state.editingClassId = classId;
   state.editingStudents = cls.students.map(s => ({...s}));
+  selectedSeatPos = null;
   document.getElementById('classModalTitle').textContent = 'クラス編集';
   document.getElementById('classNameInput').value = cls.name;
   document.getElementById('classColsInput').value = cls.cols;
   document.getElementById('classRowsInput').value = cls.rows;
   document.getElementById('deleteClassBtn').style.display = 'block';
-  renderStudentList();
+  document.getElementById('seatInputBar').style.display = 'none';
+  renderEditGrid();
   document.getElementById('classModal').classList.add('open');
 }
 
@@ -791,31 +787,69 @@ function closeClassModal() {
   state.editingClassId = null;
 }
 
-function renderStudentList() {
+let selectedSeatPos = null; // { row, col }
+
+function renderEditGrid() {
+  const cols = Math.max(1, Math.min(10, parseInt(document.getElementById('classColsInput').value) || 6));
+  const rows = Math.max(1, Math.min(10, parseInt(document.getElementById('classRowsInput').value) || 5));
   document.getElementById('studentCount').textContent = state.editingStudents.length;
-  const list = document.getElementById('studentList');
-  list.innerHTML = state.editingStudents.map((s, i) => `
-    <div class="student-item">
-      <div class="student-num">${i+1}</div>
-      <div class="student-name">${escapeHtml(s.name)}</div>
-      <button class="student-del" onclick="removeStudent(${i})">×</button>
-    </div>
-  `).join('');
+
+  let html = `<div class="blackboard-mini">黒　板</div>`;
+  html += `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:5px;">`;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const student = state.editingStudents.find(s => s.row === r && s.col === c);
+      const isSel = selectedSeatPos && selectedSeatPos.row === r && selectedSeatPos.col === c;
+      if (student) {
+        html += `<div class="edit-seat occupied${isSel ? ' selected' : ''}" onclick="clickEditSeat(${r},${c})">${escapeHtml(student.name)}</div>`;
+      } else {
+        html += `<div class="edit-seat${isSel ? ' selected' : ''}" onclick="clickEditSeat(${r},${c})">＋</div>`;
+      }
+    }
+  }
+  html += '</div>';
+  document.getElementById('editSeatGrid').innerHTML = html;
 }
 
-function addStudent() {
-  const input = document.getElementById('newStudentInput');
-  const name = input.value.trim();
-  if (!name) return;
-  state.editingStudents.push({ id: uid(), name });
-  input.value = '';
-  renderStudentList();
+function clickEditSeat(row, col) {
+  selectedSeatPos = { row, col };
+  const student = state.editingStudents.find(s => s.row === row && s.col === col);
+  const bar = document.getElementById('seatInputBar');
+  const label = document.getElementById('seatInputLabel');
+  const input = document.getElementById('seatNameInput');
+  const delBtn = document.getElementById('seatDeleteBtn');
+
+  bar.style.display = 'block';
+  label.textContent = `${row + 1}行 ${col + 1}列 — 生徒名を入力`;
+  input.value = student ? student.name : '';
+  delBtn.style.display = student ? 'block' : 'none';
+  renderEditGrid();
   input.focus();
 }
 
-function removeStudent(index) {
-  state.editingStudents.splice(index, 1);
-  renderStudentList();
+function confirmSeatAssign() {
+  if (!selectedSeatPos) return;
+  const name = document.getElementById('seatNameInput').value.trim();
+  if (!name) { showToast('名前を入力してください'); return; }
+  const { row, col } = selectedSeatPos;
+  // 既存の生徒を同じ席から削除してから追加
+  state.editingStudents = state.editingStudents.filter(s => !(s.row === row && s.col === col));
+  state.editingStudents.push({ id: uid(), name, row, col });
+  cancelSeatInput();
+}
+
+function cancelSeatInput() {
+  selectedSeatPos = null;
+  document.getElementById('seatInputBar').style.display = 'none';
+  document.getElementById('seatNameInput').value = '';
+  renderEditGrid();
+}
+
+function deleteSeat() {
+  if (!selectedSeatPos) return;
+  const { row, col } = selectedSeatPos;
+  state.editingStudents = state.editingStudents.filter(s => !(s.row === row && s.col === col));
+  cancelSeatInput();
 }
 
 function saveClass() {
