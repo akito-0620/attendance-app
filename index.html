@@ -19,7 +19,6 @@
       padding-bottom: env(safe-area-inset-bottom);
     }
 
-    /* ===== HEADER ===== */
     .header {
       background: #fff;
       padding: 12px 16px 8px;
@@ -32,7 +31,6 @@
     .header h1 { font-size: 20px; font-weight: 700; }
     .header-sub { font-size: 13px; color: #8e8e93; margin-top: 2px; }
 
-    /* ===== NAV ===== */
     .nav {
       position: fixed;
       bottom: 0;
@@ -61,11 +59,9 @@
     .nav-btn.active { color: #007aff; }
     .nav-btn svg { width: 24px; height: 24px; }
 
-    /* ===== SCREEN ===== */
     .screen { display: none; padding: 12px 16px 90px; }
     .screen.active { display: block; }
 
-    /* ===== ATTENDANCE SCREEN ===== */
     .controls {
       background: #fff;
       border-radius: 12px;
@@ -89,32 +85,32 @@
 
     .stats {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       margin-bottom: 12px;
     }
     .stat-card {
       flex: 1;
       background: #fff;
       border-radius: 10px;
-      padding: 10px;
+      padding: 8px 4px;
       text-align: center;
     }
-    .stat-num { font-size: 24px; font-weight: 700; }
+    .stat-num { font-size: 22px; font-weight: 700; }
     .stat-num.present { color: #34c759; }
-    .stat-num.absent { color: #ff3b30; }
-    .stat-label { font-size: 12px; color: #8e8e93; margin-top: 2px; }
+    .stat-num.late    { color: #ff9500; }
+    .stat-num.absent  { color: #ff3b30; }
+    .stat-label { font-size: 11px; color: #8e8e93; margin-top: 2px; }
 
     .seat-grid-wrap {
       background: #fff;
       border-radius: 12px;
       padding: 12px;
       margin-bottom: 12px;
-      overflow-x: auto;
     }
     .grid-label {
-      font-size: 12px;
+      font-size: 11px;
       color: #8e8e93;
-      margin-bottom: 8px;
+      margin-top: 8px;
       text-align: center;
     }
     .blackboard {
@@ -124,20 +120,23 @@
       padding: 6px;
       border-radius: 6px;
       font-size: 12px;
-      margin-bottom: 10px;
+      margin-top: 10px;
     }
     .seat-grid {
       display: grid;
-      gap: 6px;
-      justify-content: center;
+      gap: 5px;
+      width: 100%;
     }
+    /* 席：幅は列数で均等分割、縦横比で高さを維持 */
     .seat {
-      width: 64px;
-      height: 52px;
+      width: 100%;
+      aspect-ratio: 5 / 4;
+      min-height: 44px;
       border-radius: 8px;
       border: 1.5px solid #e5e5ea;
       background: #f9f9f9;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       font-size: 11px;
@@ -145,10 +144,11 @@
       text-align: center;
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s, transform 0.1s;
-      padding: 4px;
+      padding: 3px;
       line-height: 1.3;
       word-break: break-all;
       user-select: none;
+      overflow: hidden;
     }
     .seat.present {
       background: #34c759;
@@ -156,12 +156,28 @@
       color: #fff;
       font-weight: 600;
     }
+    .seat.late {
+      background: #ff9500;
+      border-color: #e08600;
+      color: #fff;
+      font-weight: 600;
+    }
+    .seat.absent {
+      background: #ff3b30;
+      border-color: #d9342a;
+      color: #fff;
+      font-weight: 600;
+    }
+    .seat.unknown {
+      background: #f9f9f9;
+      border-color: #e5e5ea;
+      color: #8e8e93;
+    }
     .seat:active { transform: scale(0.93); }
     .seat.empty {
       background: #f2f2f7;
       border-color: #e5e5ea;
-      cursor: default;
-      color: transparent;
+      pointer-events: none;
     }
 
     .save-btn {
@@ -186,7 +202,6 @@
       line-height: 1.6;
     }
 
-    /* ===== CLASSES SCREEN ===== */
     .section-title {
       font-size: 13px;
       font-weight: 600;
@@ -226,7 +241,6 @@
     }
     .add-btn:active { background: #0062cc; }
 
-    /* ===== HISTORY SCREEN ===== */
     .history-filter {
       display: flex;
       gap: 8px;
@@ -257,9 +271,10 @@
     }
     .history-date { font-size: 15px; font-weight: 600; }
     .history-class { font-size: 13px; color: #8e8e93; }
-    .history-stats { font-size: 14px; }
+    .history-stats { font-size: 13px; text-align: right; line-height: 1.6; }
     .history-stats span { font-weight: 600; }
     .history-stats .p { color: #34c759; }
+    .history-stats .l { color: #ff9500; }
     .history-stats .a { color: #ff3b30; }
     .history-detail {
       padding: 10px 16px;
@@ -278,7 +293,6 @@
       margin-top: 4px;
     }
 
-    /* ===== MODAL ===== */
     .modal-backdrop {
       display: none;
       position: fixed;
@@ -339,7 +353,6 @@
       cursor: pointer;
     }
 
-    /* Class edit modal - seat grid */
     .seat-hint { font-size: 12px; color: #8e8e93; margin-top: 2px; }
     .blackboard-mini {
       background: #2d5a27;
@@ -348,10 +361,13 @@
       padding: 5px;
       border-radius: 6px;
       font-size: 11px;
-      margin-bottom: 6px;
+      margin-top: 6px;
     }
+    /* 編集用席：幅は列数均等、縦横比で高さを維持 */
     .edit-seat {
-      height: 48px;
+      width: 100%;
+      aspect-ratio: 5 / 4;
+      min-height: 40px;
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -366,6 +382,7 @@
       border: 1.5px dashed #c7c7cc;
       color: #c7c7cc;
       user-select: none;
+      overflow: hidden;
     }
     .edit-seat.occupied {
       background: #e8f4fd;
@@ -390,7 +407,6 @@
       margin-top: 8px;
     }
 
-    /* Toast */
     .toast {
       position: fixed;
       bottom: 90px;
@@ -414,13 +430,11 @@
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <h1 id="headerTitle">出席確認</h1>
   <div class="header-sub" id="headerSub"></div>
 </div>
 
-<!-- SCREENS -->
 <div id="screenAttendance" class="screen active">
   <div class="controls">
     <select id="classSelect" onchange="onClassChange()"></select>
@@ -444,7 +458,6 @@
   <div id="historyList"></div>
 </div>
 
-<!-- BOTTOM NAV -->
 <nav class="nav">
   <button class="nav-btn active" id="navAttendance" onclick="showScreen('attendance')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -470,7 +483,6 @@
   </button>
 </nav>
 
-<!-- MODAL: New/Edit Class -->
 <div class="modal-backdrop" id="classModal">
   <div class="modal">
     <div class="modal-title" id="classModalTitle">新しいクラス</div>
@@ -491,7 +503,7 @@
     <div class="form-row">
       <div class="form-label">座席配置（<span id="studentCount">0</span>名登録済み）</div>
       <div class="seat-hint">空の席をタップして生徒を配置できます</div>
-      <div id="editSeatGrid" style="overflow-x:auto; margin-top:8px;"></div>
+      <div id="editSeatGrid" style="margin-top:8px;"></div>
       <div id="seatInputBar" style="display:none; margin-top:10px;">
         <div class="form-label" id="seatInputLabel">生徒名を入力</div>
         <div style="display:flex;gap:8px;margin-top:4px;">
@@ -512,23 +524,24 @@
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== STATE =====
+// 出席状態：タップするたびにこの順で切り替わる
+const STATUS_CYCLE = ['unknown', 'present', 'late', 'absent'];
+const STATUS_LABEL = { present: '出席', late: '遅刻', absent: '欠席', unknown: '不明' };
+
 let state = {
   screen: 'attendance',
   classes: [],
   records: [],
   currentClassId: null,
   currentDate: todayStr(),
-  presentIds: new Set(),
+  statusMap: {},   // studentId -> 'present' | 'late' | 'absent' | 'unknown'
   editingClassId: null,
   editingStudents: [],
 };
 
-// ===== STORAGE =====
 function loadData() {
   try {
     const raw = localStorage.getItem('juku_attendance_v1');
@@ -538,7 +551,6 @@ function loadData() {
       state.records = d.records || [];
     }
   } catch(e) {}
-  // 旧データの移行: row/colがない生徒にインデックスから位置を割り当て
   state.classes.forEach(cls => {
     cls.students.forEach((s, i) => {
       if (s.row === undefined || s.col === undefined) {
@@ -559,7 +571,6 @@ function saveData() {
   }));
 }
 
-// ===== UTILS =====
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 }
@@ -584,7 +595,6 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-// ===== NAVIGATION =====
 function showScreen(name) {
   state.screen = name;
   ['attendance','classes','history'].forEach(s => {
@@ -608,20 +618,15 @@ function updateHeader() {
   }
 }
 
-// ===== ATTENDANCE SCREEN =====
 function renderAttendance() {
-  // Class select
   const sel = document.getElementById('classSelect');
   sel.innerHTML = state.classes.length === 0
     ? '<option value="">クラスを追加してください</option>'
     : state.classes.map(c => `<option value="${c.id}" ${c.id === state.currentClassId ? 'selected' : ''}>${c.name}</option>`).join('');
 
-  // Date input
   document.getElementById('dateInput').value = state.currentDate;
 
-  // Load existing record if any
   loadAttendanceRecord();
-
   renderAttendanceContent();
 }
 
@@ -629,9 +634,18 @@ function loadAttendanceRecord() {
   if (!state.currentClassId) return;
   const rec = state.records.find(r => r.classId === state.currentClassId && r.date === state.currentDate);
   if (rec) {
-    state.presentIds = new Set(rec.presentIds);
+    if (rec.statusMap) {
+      // 新フォーマット
+      state.statusMap = { ...rec.statusMap };
+    } else if (rec.presentIds) {
+      // 旧フォーマット（presentIds配列）を変換
+      state.statusMap = {};
+      rec.presentIds.forEach(id => { state.statusMap[id] = 'present'; });
+    } else {
+      state.statusMap = {};
+    }
   } else {
-    state.presentIds = new Set();
+    state.statusMap = {};
   }
 }
 
@@ -644,22 +658,29 @@ function renderAttendanceContent() {
     return;
   }
 
-  const total = cls.students.length;
-  const presentCount = [...state.presentIds].filter(id => cls.students.some(s => s.id === id)).length;
-  const absentCount = total - presentCount;
-
   const cols = cls.cols || 6;
+  let presentCount = 0, lateCount = 0, absentCount = 0;
+  cls.students.forEach(s => {
+    const st = state.statusMap[s.id] || 'unknown';
+    if (st === 'present') presentCount++;
+    else if (st === 'late') lateCount++;
+    else if (st === 'absent') absentCount++;
+  });
+  const total = cls.students.length;
 
-  // Build grid cells using row/col positions
   let seats = '';
   for (let r = 0; r < cls.rows; r++) {
     for (let c = 0; c < cols; c++) {
       const student = cls.students.find(s => s.row === r && s.col === c);
       if (student) {
-        const isPresent = state.presentIds.has(student.id);
-        seats += `<div class="seat ${isPresent ? 'present' : ''}" onclick="toggleSeat('${student.id}')">${escapeHtml(student.name)}</div>`;
+        const status = state.statusMap[student.id] || 'unknown';
+        const label = STATUS_LABEL[status];
+        seats += `<div class="seat ${status}" onclick="cycleSeatStatus('${student.id}')">
+          <span style="font-size:11px;font-weight:500;word-break:break-all;">${escapeHtml(student.name)}</span>
+          <span style="font-size:9px;opacity:0.85;margin-top:1px;">${label}</span>
+        </div>`;
       } else {
-        seats += `<div class="seat empty">　</div>`;
+        seats += `<div class="seat empty"></div>`;
       }
     }
   }
@@ -671,6 +692,10 @@ function renderAttendanceContent() {
         <div class="stat-label">出席</div>
       </div>
       <div class="stat-card">
+        <div class="stat-num late">${lateCount}</div>
+        <div class="stat-label">遅刻</div>
+      </div>
+      <div class="stat-card">
         <div class="stat-num absent">${absentCount}</div>
         <div class="stat-label">欠席</div>
       </div>
@@ -680,22 +705,21 @@ function renderAttendanceContent() {
       </div>
     </div>
     <div class="seat-grid-wrap">
-      <div class="blackboard">黒　板</div>
-      <div class="seat-grid" style="grid-template-columns: repeat(${cols}, 64px)">
+      <div class="seat-grid" style="grid-template-columns: repeat(${cols}, 1fr)">
         ${seats}
       </div>
-      <div class="grid-label" style="margin-top:8px">緑 = 出席　白 = 欠席</div>
+      <div class="blackboard">黒　板</div>
+      <div class="grid-label">緑=出席　橙=遅刻　赤=欠席　灰=不明</div>
     </div>
     <button class="save-btn" onclick="saveAttendance()">出席を保存</button>
   `;
 }
 
-function toggleSeat(studentId) {
-  if (state.presentIds.has(studentId)) {
-    state.presentIds.delete(studentId);
-  } else {
-    state.presentIds.add(studentId);
-  }
+// タップするたびに unknown→present→late→absent→unknown と切り替え
+function cycleSeatStatus(studentId) {
+  const current = state.statusMap[studentId] || 'unknown';
+  const idx = STATUS_CYCLE.indexOf(current);
+  state.statusMap[studentId] = STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length];
   renderAttendanceContent();
 }
 
@@ -719,7 +743,7 @@ function saveAttendance() {
     id: existing >= 0 ? state.records[existing].id : uid(),
     date: state.currentDate,
     classId: state.currentClassId,
-    presentIds: [...state.presentIds],
+    statusMap: { ...state.statusMap },
     savedAt: new Date().toISOString()
   };
   if (existing >= 0) {
@@ -731,7 +755,6 @@ function saveAttendance() {
   showToast('保存しました ✓');
 }
 
-// ===== CLASSES SCREEN =====
 function renderClasses() {
   const list = document.getElementById('classList');
   if (state.classes.length === 0) {
@@ -749,7 +772,6 @@ function renderClasses() {
   `).join('');
 }
 
-// ===== CLASS MODAL =====
 function openNewClassModal() {
   state.editingClassId = null;
   state.editingStudents = [];
@@ -787,15 +809,14 @@ function closeClassModal() {
   state.editingClassId = null;
 }
 
-let selectedSeatPos = null; // { row, col }
+let selectedSeatPos = null;
 
 function renderEditGrid() {
   const cols = Math.max(1, Math.min(10, parseInt(document.getElementById('classColsInput').value) || 6));
   const rows = Math.max(1, Math.min(10, parseInt(document.getElementById('classRowsInput').value) || 5));
   document.getElementById('studentCount').textContent = state.editingStudents.length;
 
-  let html = `<div class="blackboard-mini">黒　板</div>`;
-  html += `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:5px;">`;
+  let html = `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:5px;">`;
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const student = state.editingStudents.find(s => s.row === r && s.col === c);
@@ -808,6 +829,8 @@ function renderEditGrid() {
     }
   }
   html += '</div>';
+  // 黒板は座席グリッドの下（手前）
+  html += `<div class="blackboard-mini">黒　板</div>`;
   document.getElementById('editSeatGrid').innerHTML = html;
 }
 
@@ -832,7 +855,6 @@ function confirmSeatAssign() {
   const name = document.getElementById('seatNameInput').value.trim();
   if (!name) { showToast('名前を入力してください'); return; }
   const { row, col } = selectedSeatPos;
-  // 既存の生徒を同じ席から削除してから追加
   state.editingStudents = state.editingStudents.filter(s => !(s.row === row && s.col === col));
   state.editingStudents.push({ id: uid(), name, row, col });
   cancelSeatInput();
@@ -889,9 +911,7 @@ function deleteCurrentClass() {
   showToast('削除しました');
 }
 
-// ===== HISTORY SCREEN =====
 function renderHistory() {
-  // Update filter options
   const filter = document.getElementById('historyClassFilter');
   const currentFilter = filter.value;
   filter.innerHTML = '<option value="">全クラス</option>' +
@@ -911,18 +931,28 @@ function renderHistory() {
   list.innerHTML = records.map(rec => {
     const cls = state.classes.find(c => c.id === rec.classId);
     const className = cls ? cls.name : '（削除済みクラス）';
-    const total = cls ? cls.students.length : rec.presentIds.length;
-    const presentCount = cls
-      ? rec.presentIds.filter(id => cls.students.some(s => s.id === id)).length
-      : rec.presentIds.length;
-    const absentCount = total - presentCount;
 
-    const presentNames = cls
-      ? rec.presentIds.map(id => cls.students.find(s => s.id === id)?.name).filter(Boolean)
-      : [];
-    const absentNames = cls
-      ? cls.students.filter(s => !rec.presentIds.includes(s.id)).map(s => s.name)
-      : [];
+    // 旧フォーマット（presentIds）を変換
+    let statusMap = rec.statusMap ? { ...rec.statusMap } : {};
+    if (!rec.statusMap && rec.presentIds) {
+      rec.presentIds.forEach(id => { statusMap[id] = 'present'; });
+    }
+
+    let presentCount = 0, lateCount = 0, absentCount = 0, unknownCount = 0;
+    if (cls) {
+      cls.students.forEach(s => {
+        const st = statusMap[s.id] || 'unknown';
+        if (st === 'present') presentCount++;
+        else if (st === 'late') lateCount++;
+        else if (st === 'absent') absentCount++;
+        else unknownCount++;
+      });
+    }
+
+    const presentNames = cls ? cls.students.filter(s => statusMap[s.id] === 'present').map(s => s.name) : [];
+    const lateNames    = cls ? cls.students.filter(s => statusMap[s.id] === 'late').map(s => s.name) : [];
+    const absentNames  = cls ? cls.students.filter(s => statusMap[s.id] === 'absent').map(s => s.name) : [];
+    const unknownNames = cls ? cls.students.filter(s => !statusMap[s.id] || statusMap[s.id] === 'unknown').map(s => s.name) : [];
 
     return `
       <div class="history-card">
@@ -932,18 +962,14 @@ function renderHistory() {
             <div class="history-class">${escapeHtml(className)}</div>
           </div>
           <div class="history-stats">
-            <span class="p">${presentCount}出席</span> / <span class="a">${absentCount}欠席</span>
+            <span class="p">${presentCount}出席</span>　<span class="l">${lateCount}遅刻</span>　<span class="a">${absentCount}欠席</span>
           </div>
         </div>
         <div class="history-detail" id="detail_${rec.id}">
-          <div class="history-names">
-            <strong>出席 (${presentCount}名)：</strong>
-            ${presentNames.length > 0 ? escapeHtml(presentNames.join('、')) : 'なし'}
-          </div>
-          <div class="history-names" style="margin-top:6px">
-            <strong>欠席 (${absentCount}名)：</strong>
-            ${absentNames.length > 0 ? escapeHtml(absentNames.join('、')) : 'なし'}
-          </div>
+          <div class="history-names"><strong>出席 (${presentCount}名)：</strong>${presentNames.length > 0 ? escapeHtml(presentNames.join('、')) : 'なし'}</div>
+          ${lateCount > 0 ? `<div class="history-names" style="margin-top:4px"><strong>遅刻 (${lateCount}名)：</strong>${escapeHtml(lateNames.join('、'))}</div>` : ''}
+          ${absentCount > 0 ? `<div class="history-names" style="margin-top:4px"><strong>欠席 (${absentCount}名)：</strong>${escapeHtml(absentNames.join('、'))}</div>` : ''}
+          ${unknownNames.length > 0 ? `<div class="history-names" style="margin-top:4px"><strong>不明 (${unknownNames.length}名)：</strong>${escapeHtml(unknownNames.join('、'))}</div>` : ''}
           <button class="delete-btn" onclick="deleteRecord('${rec.id}')">この記録を削除</button>
         </div>
       </div>
@@ -963,22 +989,18 @@ function deleteRecord(id) {
   showToast('削除しました');
 }
 
-// ===== HELPERS =====
 function escapeHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Close modal on backdrop click
 document.getElementById('classModal').addEventListener('click', function(e) {
   if (e.target === this) closeClassModal();
 });
 
-// ===== INIT =====
 loadData();
 updateHeader();
 renderAttendance();
 
-// Register service worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
